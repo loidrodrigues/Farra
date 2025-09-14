@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../services/api";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -7,6 +8,9 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
@@ -38,11 +42,25 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle register logic here
-      console.log("Register attempt:", { name, email, password });
+      setLoading(true);
+      try {
+        await registerUser({
+          username: name,
+          email,
+          password,
+        });
+        setSuccessMessage("Conta criada com sucesso!");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } catch (error) {
+        setErrors({ general: error.message || "Erro ao registrar" });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -155,10 +173,21 @@ export default function Register() {
 
           <button
             type="submit"
-            className="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-gray-900 cursor-pointer transition-colors font-medium font-inter"
+            disabled={loading}
+            className="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-gray-900 cursor-pointer transition-colors font-medium font-inter disabled:opacity-50"
           >
-            Criar Conta
+            {loading ? "Criando..." : "Criar Conta"}
           </button>
+          {successMessage && (
+            <p className="text-green-500 text-sm mt-4 text-center">
+              {successMessage}
+            </p>
+          )}
+          {errors.general && (
+            <p className="text-red-500 text-sm mt-4 text-center">
+              {errors.general}
+            </p>
+          )}
         </form>
 
         <div className="mt-6 text-center">

@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <header className="fixed top-0 w-full bg-gray-900 bg-opacity-95 backdrop-blur-md z-50 shadow-md">
@@ -43,6 +51,7 @@ export default function Header() {
             >
               Vender Ingressos
             </Link>
+
             <Link
               to="/help"
               className=" text-gray-200 hover:text-white transition-colors font-medium"
@@ -51,20 +60,39 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* Auth Buttons */}
+          {/* Auth Buttons or User Info */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              to="/login"
-              className="bg-amber-600 px-4 py-2 text-white text-sm cursor-pointer rounded-md font-medium hover:bg-gray-800 transition-colors"
-            >
-              Entrar
-            </Link>
-            <Link
-              to="/register"
-              className=" px-4 py-2 rounded-md text-sm font-medium cursor-pointer text-white hover:bg-primary-dark transition-colors"
-            >
-              Criar Conta
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="text-white font-medium hover:text-gray-200 transition-colors"
+                >
+                  Olá, {user.username}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 px-4 py-2 text-white text-sm cursor-pointer rounded-md font-medium hover:bg-red-800 transition-colors"
+                >
+                  Sair
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="bg-amber-600 px-4 py-2 text-white text-sm cursor-pointer rounded-md font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Entrar
+                </Link>
+                <Link
+                  to="/register"
+                  className=" px-4 py-2 rounded-md text-sm font-medium cursor-pointer text-white hover:bg-primary-dark transition-colors"
+                >
+                  Criar Conta
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -118,14 +146,44 @@ export default function Header() {
               >
                 Para Organizadores
               </Link>
+              {user && (
+                <Link
+                  to="/profile"
+                  className="text-gray-200 hover:text-white transition-colors font-medium"
+                >
+                  Perfil
+                </Link>
+              )}
             </nav>
             <div className="flex flex-col space-y-3 mt-6">
-              <Link to="/login" className="btn-outline w-full text-center">
-                Entrar
-              </Link>
-              <Link to="/register" className="btn-primary w-full text-center">
-                Criar Conta
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="text-white font-medium text-center mb-2 hover:text-gray-200 transition-colors"
+                  >
+                    Olá, {user.username}
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="btn-logout w-full text-center bg-red-600 text-white py-2 rounded-md hover:bg-red-800 transition-colors"
+                  >
+                    Sair
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="btn-outline w-full text-center">
+                    Entrar
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="btn-primary w-full text-center"
+                  >
+                    Criar Conta
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { sellTicket } from "../services/api";
+import { Loader } from "lucide-react";
 import {
   Plus,
   Trash2,
@@ -9,6 +13,8 @@ import {
 } from "lucide-react";
 
 export default function SellTickets() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [eventData, setEventData] = useState({
     title: "",
     description: "",
@@ -29,6 +35,8 @@ export default function SellTickets() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const validateStep1 = () => {
     const newErrors = {};
@@ -117,11 +125,42 @@ export default function SellTickets() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Evento criado:", eventData);
-    // Aqui você integraria com a API
-    alert("Evento criado com sucesso!");
+    if (!user) {
+      setSubmitError("Você precisa estar logado para vender ingressos.");
+      return;
+    }
+    setLoading(true);
+    setSubmitError("");
+
+    try {
+      const eventDate = new Date(`${eventData.date}T${eventData.time}`);
+
+      for (const ticket of eventData.tickets) {
+        await sellTicket({
+          eventTitle: eventData.title,
+          eventDate,
+          eventTime: eventData.time,
+          eventLocation: eventData.location,
+          eventAddress: eventData.location, // Usando location como address por enquanto
+          eventDescription: eventData.description,
+          eventImage: eventData.image || "",
+          eventCategory: eventData.category,
+          ticketType: ticket.type,
+          price: parseFloat(ticket.price),
+          quantityAvailable: parseInt(ticket.quantity),
+        });
+      }
+
+      alert("Ingressos criados com sucesso!");
+      navigate("/"); // ou outra página
+    } catch (error) {
+      console.error("Erro ao criar ingressos:", error);
+      setSubmitError(error.message || "Erro ao criar ingressos.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const categories = [
@@ -592,19 +631,34 @@ export default function SellTickets() {
                 ))}
               </div>
 
+              {submitError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                  <p className="text-red-800">{submitError}</p>
+                </div>
+              )}
+
               <div className="flex justify-between pt-6">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
                   className="px-6 py-2 text-gray-600 hover:text-gray-700"
+                  disabled={loading}
                 >
                   ← Voltar
                 </button>
                 <button
                   type="submit"
-                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 flex items-center"
+                  disabled={loading}
                 >
-                  🎉 Publicar Evento
+                  {loading ? (
+                    <>
+                      <Loader size={20} className="mr-2 animate-spin" />
+                      Publicando...
+                    </>
+                  ) : (
+                    <>🎉 Publicar Evento</>
+                  )}
                 </button>
               </div>
             </div>

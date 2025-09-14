@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import { buyTicket, getTicketDetails } from "../services/api";
 import {
   ArrowLeft,
   Calendar,
@@ -18,44 +19,75 @@ export default function TicketDetails() {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [selectedTicket, setSelectedTicket] = useState(0);
+  const [ticket, setTicket] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Dados mockados do evento - substituir por dados reais da API
+  useEffect(() => {
+    const fetchTicketDetails = async () => {
+      try {
+        const data = await getTicketDetails(id);
+        setTicket(data);
+      } catch {
+        setError("Erro ao carregar detalhes do ingresso.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTicketDetails();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="loader">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="text-center text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="text-center text-gray-600">
+          Ingresso não encontrado.
+        </div>
+      </div>
+    );
+  }
+
+  // Map ticket data to event structure for display
   const event = {
-    id: 1,
-    title: "Festival de Verão 2023",
+    id: ticket._id,
+    title: ticket.eventTitle,
     description:
-      "O maior festival de música do ano! Trazendo os melhores artistas nacionais e internacionais para uma noite inesquecível em Luanda. Comidas típicas, bebidas geladas e muita música boa.",
+      ticket.eventDescription || "Evento incrível aguardando por você!",
     image:
-      "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80",
-    date: "2023-12-15",
-    time: "20:00",
-    location: "Marginal de Luanda",
-    address: "Avenida 4 de Fevereiro, Luanda",
-    category: "Shows & Concertos",
+      ticket.eventImage || "https://via.placeholder.com/800x400?text=Evento",
+    date: new Date(ticket.eventDate).toLocaleDateString("pt-BR"),
+    time: ticket.eventTime || "Horário não especificado",
+    location: ticket.eventLocation || "Local não especificado",
+    address: ticket.eventAddress || "Endereço não especificado",
+    category: ticket.eventCategory || "Evento",
     tickets: [
       {
-        type: "Inteira",
-        price: 5000,
-        available: 150,
-        description: "Acesso geral ao evento",
-      },
-      {
-        type: "VIP",
-        price: 10000,
-        available: 50,
-        description: "Área exclusiva, open bar e comida",
-      },
-      {
-        type: "Meia Entrada",
-        price: 2500,
-        available: 100,
-        description: "Para estudantes e idosos (com documentação)",
+        type: ticket.ticketType,
+        price: ticket.price,
+        available: ticket.quantityAvailable,
+        description: `Ingresso do tipo ${ticket.ticketType}`,
       },
     ],
     organizer: {
-      name: "Produtora Eventos LTDA",
-      rating: 4.8,
-      events: 47,
+      name: ticket.seller ? ticket.seller.username : "Organizador",
+      rating: 4.5, // Default rating
+      events: 1, // Default events count
     },
   };
 
@@ -284,7 +316,17 @@ export default function TicketDetails() {
               </div>
 
               {/* Botão de Comprar */}
-              <button className="w-full bg-amber-600 text-white py-4 rounded-lg font-semibold hover:bg-amber-700 transition-colors flex items-center justify-center">
+              <button
+                onClick={async () => {
+                  try {
+                    await buyTicket(event.id, quantity);
+                    alert("Compra realizada com sucesso!");
+                  } catch (error) {
+                    alert("Erro ao comprar ingresso: " + error.message);
+                  }
+                }}
+                className="w-full bg-amber-600 text-white py-4 rounded-lg font-semibold hover:bg-amber-700 transition-colors flex items-center justify-center"
+              >
                 <Ticket size={20} className="mr-2" />
                 Comprar Ingressos
               </button>

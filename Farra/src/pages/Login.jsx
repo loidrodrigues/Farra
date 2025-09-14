@@ -1,10 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const validateForm = () => {
     const newErrors = {};
@@ -26,11 +31,21 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      // Handle login logic here
-      console.log("Login attempt:", { email, password });
+      setLoading(true);
+      try {
+        const response = await loginUser({ email, password });
+        // Usar o contexto para fazer login
+        login(response.user, response.token);
+        // Redirecionar para home
+        navigate("/");
+      } catch (error) {
+        setErrors({ general: error.message || "Erro ao fazer login" });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -95,10 +110,16 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-amber-600 text-white py-2 px-4 rounded-md cursor-pointer hover:bg-gray-900 transition-colors font-medium font-inter"
+            disabled={loading}
+            className="w-full bg-amber-600 text-white py-2 px-4 rounded-md cursor-pointer hover:bg-gray-900 transition-colors font-medium font-inter disabled:opacity-50"
           >
-            Entrar
+            {loading ? "Entrando..." : "Entrar"}
           </button>
+          {errors.general && (
+            <p className="text-red-500 text-sm mt-4 text-center">
+              {errors.general}
+            </p>
+          )}
         </form>
 
         <div className="mt-6 text-center">

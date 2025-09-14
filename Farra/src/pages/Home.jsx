@@ -1,10 +1,21 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import EventCard from "../components/EventCard";
-import { fakeEvents } from "../data/fakeEvents";
+import { getAvailableTickets } from "../services/api";
 import { PartyPopper, Presentation, Cake, Mic, Briefcase } from "lucide-react";
 import CallAction from "../components/callAction";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const handleCategoryClick = (categoryTitle) => {
+    navigate(`/events?category=${encodeURIComponent(categoryTitle)}`);
+  };
+
   const categories = [
     {
       id: 1,
@@ -38,6 +49,77 @@ export default function Home() {
     },
   ];
 
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const data = await getAvailableTickets();
+        setTickets(data);
+      } catch {
+        setError("Erro ao carregar ingressos.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTickets();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="m-32">
+        <div className="flex justify-center items-center h-64">
+          <div className="loader">Carregando...</div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="m-32">
+        <div className="text-center text-red-600">{error}</div>
+      </section>
+    );
+  }
+
+  // Group tickets by event (unique eventTitle + eventDate)
+  const eventsMap = new Map();
+
+  tickets.forEach((ticket) => {
+    const eventKey = `${ticket.eventTitle}-${ticket.eventDate.split("T")[0]}`;
+
+    if (!eventsMap.has(eventKey)) {
+      eventsMap.set(eventKey, {
+        id: ticket._id, // Use first ticket ID as representative
+        title: ticket.eventTitle,
+        image:
+          ticket.eventImage ||
+          "https://via.placeholder.com/300x200?text=Evento",
+        date: new Date(ticket.eventDate).toLocaleDateString("pt-BR"),
+        time: ticket.eventTime || "",
+        location: ticket.eventLocation || "Local não especificado",
+        address: ticket.eventAddress || "",
+        description: (ticket.eventDescription || "").slice(0, 60),
+        category: ticket.eventCategory || "Evento",
+        tickets: [],
+        minPrice: ticket.price,
+        maxPrice: ticket.price,
+        totalAvailable: 0,
+      });
+    }
+
+    const event = eventsMap.get(eventKey);
+    event.tickets.push({
+      type: ticket.ticketType,
+      price: ticket.price,
+      available: ticket.quantityAvailable,
+    });
+    event.minPrice = Math.min(event.minPrice, ticket.price);
+    event.maxPrice = Math.max(event.maxPrice, ticket.price);
+    event.totalAvailable += ticket.quantityAvailable;
+  });
+
+  const events = Array.from(eventsMap.values());
+
   return (
     <section className="m-32">
       <div>
@@ -57,6 +139,7 @@ export default function Home() {
               return (
                 <div
                   key={category.id}
+                  onClick={() => handleCategoryClick(category.title)}
                   className="bg-gray-100 p-4 rounded-lg shadow hover:shadow-lg transition-shadow duration-300 text-center cursor-pointer"
                 >
                   <div className="flex justify-center mb-2">
@@ -66,7 +149,7 @@ export default function Home() {
                     {category.title}
                   </h3>
                   <p className="text-sm text-zinc-500">
-                    {category.description}
+                    {category.description}...
                   </p>
                 </div>
               );
@@ -90,7 +173,7 @@ export default function Home() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {fakeEvents.map((event) => (
+            {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
@@ -112,7 +195,7 @@ export default function Home() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {fakeEvents.slice(0, 3).map((event) => (
+            {events.slice(0, 3).map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>

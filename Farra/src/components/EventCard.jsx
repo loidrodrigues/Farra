@@ -14,7 +14,7 @@ const EventCard = ({ event }) => {
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
             {event.title}
           </h3>
-          <p className="text-gray-600 text-sm mb-2">{event.description}</p>
+          <p className="text-gray-600 text-sm mb-2">{event.description}...</p>
           <div className="text-sm text-gray-500">
             <p className=" text-amber-600 inline-block text-sm py-1 font-bold italic mb-2">
               {event.date}
