@@ -6,12 +6,14 @@ import Register from "../pages/Register";
 import SellTickets from "../pages/SellTickets";
 import Help from "../pages/Help";
 import Organizer from "../pages/Organizer";
+import TicketDetails from "../pages/TicketDetails";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/events" element={<Events />} />
+      <Route path="/ticket/:id" element={<TicketDetails />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/sell-tickets" element={<SellTickets />} />
