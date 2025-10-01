@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
@@ -9,7 +9,13 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -54,7 +60,7 @@ export default function Login() {
       <div className="max-w-md w-[400px] bg-white rounded-lg shadow-lg p-8 ">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-dark ">
-            FARRA<span className="text-primary">.</span>
+            MIND<span className="text-primary">.</span>
           </h1>
           <p className="text-gray-600 mt-2 font-inter">Entre na sua conta</p>
         </div>
@@ -122,7 +128,15 @@ export default function Login() {
           )}
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-2">
+          <p className="text-gray-600 text-sm ">
+            <Link
+              to="/forgot-password"
+              className="text-primary hover:underline"
+            >
+              Esqueceu a senha?
+            </Link>
+          </p>
           <p className="text-gray-600 text-sm ">
             Não tem uma conta?{" "}
             <Link to="/register" className="text-zinc-900 font-medium">

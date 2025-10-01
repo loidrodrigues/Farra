@@ -21,7 +21,7 @@ export default function Header() {
             to="/"
             className="flex items-center text-2xl font-bold text-white font-fredoka"
           >
-            FARRA<span className="text-primary">.</span>
+            MIND<span className="text-primary">.</span>
           </Link>
 
           {/* Desktop Navigation */}

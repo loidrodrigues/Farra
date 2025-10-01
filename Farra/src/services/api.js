@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:3000"; // Ajuste para o URL do seu backend
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"; // Ajuste para o URL do seu backend
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -53,7 +54,9 @@ export const sellTicket = async (ticketData) => {
 // Função para comprar ingresso
 export const buyTicket = async (ticketId, quantity) => {
   try {
-    const response = await api.post(`/tickets/buy/${ticketId}`, { quantity });
+    const response = await api.post(`/tickets/buy/${ticketId}`, {
+      quantity,
+    });
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
@@ -84,6 +87,29 @@ export const getTicketDetails = async (id) => {
 export const getUserProfile = async () => {
   try {
     const response = await api.get("/users/profile");
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Função para solicitar recuperação de senha
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Função para redefinir senha
+export const resetPassword = async (token, newPassword) => {
+  try {
+    const response = await api.post("/auth/reset-password", {
+      token,
+      newPassword,
+    });
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;

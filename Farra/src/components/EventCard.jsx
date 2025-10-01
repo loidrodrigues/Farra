@@ -22,6 +22,19 @@ const EventCard = ({ event }) => {
             <p>
               <strong>Local:</strong> {event.location}
             </p>
+            {event.tickets && event.tickets.length > 0 && (
+              <p className="mt-4">
+                {event.tickets.map((ticket, index) => (
+                  <span
+                    key={index}
+                    className="bg-amber-600 text-white  px-4 py-1 rounded-md mr-1"
+                  >
+                    {ticket.type}
+                    {index < event.tickets.length - 1 ? " " : ""}
+                  </span>
+                ))}
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import {
   Ticket,
   Users,
@@ -15,6 +16,8 @@ import {
 } from "lucide-react";
 
 export default function Organizer() {
+  const { user } = useAuth();
+
   const features = [
     {
       icon: <Ticket className="w-8 h-8" />,
@@ -75,7 +78,7 @@ export default function Organizer() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-amber-600 to-amber-700 text-white py-20">
+      <section className="bg-gradient-to-r from-amber-700 to-zinc-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">
             <div className="w-20 h-20 bg-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 mt-4">
@@ -89,16 +92,27 @@ export default function Organizer() {
               ingressos e surpreenderem seu público
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                to="/register"
-                className="bg-white text-amber-600 px-4 py-3 rounded-md font-normal text-sm hover:bg-gray-100 transition-colors flex items-center justify-center"
-              >
-                Começar agora <ArrowRight size={20} className="ml-2" />
-              </Link>
-              <button className="flex items-center text-white hover:text-amber-200 text-sm transition-colors">
-                <Play className="w-5 h-5 mr-2" />
-                Ver vídeo demonstrativo
-              </button>
+              {!user ? (
+                <>
+                  <Link
+                    to="/register"
+                    className="bg-white text-amber-600 px-4 py-3 rounded-md font-normal text-sm hover:bg-gray-100 transition-colors flex items-center justify-center"
+                  >
+                    Começar agora <ArrowRight size={20} className="ml-2" />
+                  </Link>
+                  <button className="flex items-center text-white hover:text-amber-200 text-sm transition-colors">
+                    <Play className="w-5 h-5 mr-2" />
+                    Ver vídeo demonstrativo
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/sell-tickets"
+                  className="bg-white text-amber-600 px-4 py-3 rounded-md font-normal text-sm hover:bg-gray-100 transition-colors flex items-center justify-center"
+                >
+                  Vender ingressos <ArrowRight size={20} className="ml-2" />
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -227,26 +241,37 @@ export default function Organizer() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gray-900 text-white">
+      <section className="py-16 bg-gray-900 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-xl font-bold mb-6">Pronto para começar?</h2>
-          <p className="text-gray-300 text-sm mb-8 max-w-2xl mx-auto">
+          <h2 className="text-xl font-bold mb-2">Pronto para começar?</h2>
+          <p className="text-gray-300 text-sm mb-6 max-w-2xl mx-auto">
             Junte-se a centenas de organizadores que já transformaram seus
-            eventos com a Farra
+            eventos com a MIND
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/register"
-              className="bg-amber-600  text-white px-4 py-3 rounded-lg font-normalrounded-md hover:bg-amber-700 transition-colors"
-            >
-              Criar conta
-            </Link>
-            <Link
-              to="/login"
-              className="border-2 border-white text-white px-4 py-3 rounded-lg font-normal hover:bg-white hover:text-gray-900 transition-colors"
-            >
-              Entrar na minha conta
-            </Link>
+            {!user ? (
+              <>
+                <Link
+                  to="/register"
+                  className="bg-amber-600  text-white px-4 text-sm py-3 rounded-lg font-normalrounded-md hover:bg-amber-700 transition-colors"
+                >
+                  Criar conta
+                </Link>
+                <Link
+                  to="/login"
+                  className="border-2 border-white text-white px-4 py-3 rounded-lg font-normal hover:bg-white hover:text-gray-900 transition-colors"
+                >
+                  Entrar na minha conta
+                </Link>
+              </>
+            ) : (
+              <Link
+                to="/sell-tickets"
+                className="bg-amber-600  text-white text-sm px-4 py-3 rounded-lg font-normalrounded-md hover:bg-amber-700 transition-colors"
+              >
+                Vender ingressos
+              </Link>
+            )}
           </div>
         </div>
       </section>

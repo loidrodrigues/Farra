@@ -12,10 +12,11 @@ const Footer = () => {
               to="/"
               className="flex items-center text-2xl font-bold text-white font-fredoka mb-4"
             >
-              FARRA<span className="text-primary">.</span>
+              MIND<span className="text-primary">.</span>
             </Link>
             <p className="text-gray-400 mb-6">
-              Sua entrada para as melhores festas e eventos em Angola.
+              Sua entrada para os melhores eventos de tecnologia e negócio em
+              Angola.
             </p>
             <div className="flex space-x-4">
               <a
@@ -180,7 +181,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8">
           <p className="text-center text-gray-500">
-            &copy; {new Date().getFullYear()} Farra - Todos os direitos
+            &copy; {new Date().getFullYear()} MIND - Todos os direitos
             reservados
           </p>
         </div>

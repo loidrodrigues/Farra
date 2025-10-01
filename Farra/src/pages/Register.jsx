@@ -1,16 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isOrganizer, setIsOrganizer] = useState(false);
+  const [organizationName, setOrganizationName] = useState("");
+  const [bankAccount, setBankAccount] = useState("");
+  const [nif, setNif] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -38,6 +50,15 @@ export default function Register() {
       newErrors.confirmPassword = "As senhas não coincidem";
     }
 
+    if (isOrganizer) {
+      if (!organizationName) {
+        newErrors.organizationName = "Nome da organização é obrigatório";
+      }
+      if (!bankAccount) {
+        newErrors.bankAccount = "Conta bancária é obrigatória";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -51,6 +72,10 @@ export default function Register() {
           username: name,
           email,
           password,
+          isOrganizer,
+          organizationName: isOrganizer ? organizationName : undefined,
+          bankAccount: isOrganizer ? bankAccount : undefined,
+          nif: isOrganizer ? nif : undefined,
         });
         setSuccessMessage("Conta criada com sucesso!");
         setTimeout(() => {
@@ -69,7 +94,7 @@ export default function Register() {
       <div className="max-w-md w-full bg-white rounded-lg mt-30 mb-30 shadow-lg p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-dark font-fredoka">
-            FARRA<span className="text-primary">.</span>
+            MIND<span className="text-primary">.</span>
           </h1>
           <p className="text-gray-600 mt-2 font-inter">Crie sua conta</p>
         </div>
@@ -170,6 +195,93 @@ export default function Register() {
               </p>
             )}
           </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="isOrganizer"
+              checked={isOrganizer}
+              onChange={(e) => setIsOrganizer(e.target.checked)}
+              className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded"
+            />
+            <label
+              htmlFor="isOrganizer"
+              className="block text-sm font-medium text-gray-700 font-inter"
+            >
+              Sou organizador
+            </label>
+          </div>
+
+          {isOrganizer && (
+            <>
+              <div>
+                <label
+                  htmlFor="organizationName"
+                  className="block text-sm font-medium text-gray-700 font-inter"
+                >
+                  Nome da Organização
+                </label>
+                <input
+                  type="text"
+                  id="organizationName"
+                  value={organizationName}
+                  onChange={(e) => setOrganizationName(e.target.value)}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary font-inter ${
+                    errors.organizationName
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                  placeholder="Nome da sua organização"
+                />
+                {errors.organizationName && (
+                  <p className="text-red-500 text-xs mt-1 font-inter">
+                    {errors.organizationName}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="bankAccount"
+                  className="block text-sm font-medium text-gray-700 font-inter"
+                >
+                  Conta Bancária
+                </label>
+                <input
+                  type="text"
+                  id="bankAccount"
+                  value={bankAccount}
+                  onChange={(e) => setBankAccount(e.target.value)}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary font-inter ${
+                    errors.bankAccount ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="Número da conta bancária"
+                />
+                {errors.bankAccount && (
+                  <p className="text-red-500 text-xs mt-1 font-inter">
+                    {errors.bankAccount}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="nif"
+                  className="block text-sm font-medium text-gray-700 font-inter"
+                >
+                  NIF (opcional)
+                </label>
+                <input
+                  type="text"
+                  id="nif"
+                  value={nif}
+                  onChange={(e) => setNif(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary font-inter border-gray-300"
+                  placeholder="Número de identificação fiscal"
+                />
+              </div>
+            </>
+          )}
 
           <button
             type="submit"

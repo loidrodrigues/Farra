@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { buyTicket, getTicketDetails } from "../services/api";
+import MapComponent from "../components/MapComponent";
+import PurchaseSuccessModal from "../components/PurchaseSuccessModal";
 import {
   ArrowLeft,
   Calendar,
@@ -22,6 +24,7 @@ export default function TicketDetails() {
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     const fetchTicketDetails = async () => {
@@ -136,17 +139,17 @@ export default function TicketDetails() {
           {/* Lado Esquerdo - Informações do Evento */}
           <div>
             {/* Imagem do Evento */}
-            <div className="rounded-2xl overflow-hidden shadow-lg mb-6">
+            <div className="rounded-xl overflow-hidden shadow-lg mb-6">
               <img
                 src={event.image}
                 alt={event.title}
-                className="w-full h-64 md:h-96 object-cover"
+                className="w-full h-64 md:h-80 object-cover"
               />
             </div>
 
             {/* Informações Básicas */}
             <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-              <h1 className="text-xl font-bold text-gray-900 mb-4">
+              <h1 className="text-md font-bold text-gray-900 mb-4">
                 {event.title}
               </h1>
 
@@ -181,7 +184,7 @@ export default function TicketDetails() {
 
             {/* Descrição */}
             <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              <h2 className="text-md font-semibold text-gray-900 mb-4">
                 Sobre o Evento
               </h2>
               <p className="text-gray-700 leading-relaxed">
@@ -281,7 +284,7 @@ export default function TicketDetails() {
                     <Minus size={16} />
                   </button>
 
-                  <span className="text-lg font-semibold">{quantity}</span>
+                  <span className="text-md font-semibold">{quantity}</span>
 
                   <button
                     onClick={incrementQuantity}
@@ -300,17 +303,17 @@ export default function TicketDetails() {
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-semibold">
-                    {totalPrice.toLocaleString("pt-AO")} AOA
+                    {totalPrice.toLocaleString("pt-AO")} KZ
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
                   <span>Taxa de serviço</span>
-                  <span>{(totalPrice * 0.05).toLocaleString("pt-AO")} AOA</span>
+                  <span>{(totalPrice * 0.05).toLocaleString("pt-AO")} KZ</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                   <span className="font-semibold">Total</span>
-                  <span className="text-xl font-bold text-amber-600">
-                    {(totalPrice * 1.05).toLocaleString("pt-AO")} AOA
+                  <span className="text-md font-bold text-amber-600">
+                    {(totalPrice * 1.05).toLocaleString("pt-AO")} KZ
                   </span>
                 </div>
               </div>
@@ -320,15 +323,15 @@ export default function TicketDetails() {
                 onClick={async () => {
                   try {
                     await buyTicket(event.id, quantity);
-                    alert("Compra realizada com sucesso!");
+                    setShowSuccessModal(true);
                   } catch (error) {
                     alert("Erro ao comprar ingresso: " + error.message);
                   }
                 }}
-                className="w-full bg-amber-600 text-white py-4 rounded-lg font-semibold hover:bg-amber-700 transition-colors flex items-center justify-center"
+                className="w-full bg-amber-600 text-white py-3 rounded-lg font-normal hover:bg-amber-700 transition-colors flex items-center justify-center"
               >
                 <Ticket size={20} className="mr-2" />
-                Comprar Ingressos
+                Comprar Ingresso
               </button>
 
               {/* Informações de Segurança */}
@@ -348,22 +351,26 @@ export default function TicketDetails() {
             </div>
 
             {/* Card de Localização */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
+            <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
                 <MapPin size={20} className="mr-2 text-amber-600" />
                 Localização
               </h3>
-              <div className="aspect-video bg-gray-200 rounded-lg mb-3">
-                {/* Mapa seria integrado aqui */}
-                <div className="w-full h-full flex items-center justify-center text-gray-500">
-                  Mapa do Local
-                </div>
+              <div className="h-64 bg-gray-200 rounded-lg mb-3 overflow-hidden">
+                <MapComponent address={event.address} />
               </div>
               <p className="text-sm text-gray-600">{event.address}</p>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <PurchaseSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        eventTitle={event.title}
+      />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SearchBar from "../components/SearchBar";
 import EventCard from "../components/EventCard";
 import { getAvailableTickets } from "../services/api";
 import { PartyPopper, Presentation, Cake, Mic, Briefcase } from "lucide-react";
@@ -11,6 +10,27 @@ export default function Home() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [showText, setShowText] = useState(true);
+
+  const texts = [
+    {
+      title: "Os melhores eventos de tecnologia e negócio",
+      subtitle: "Você está pronto para viver uma experiência incrível?",
+    },
+    {
+      title: "Descubra oportunidades únicas",
+      subtitle: "Conecte-se com líderes e inovadores",
+    },
+    {
+      title: "Networking de alto nível",
+      subtitle: "Amplie sua rede profissional",
+    },
+    {
+      title: "Inovação e criatividade",
+      subtitle: "Seja parte do futuro da tecnologia",
+    },
+  ];
 
   const handleCategoryClick = (categoryTitle) => {
     navigate(`/events?category=${encodeURIComponent(categoryTitle)}`);
@@ -19,33 +39,33 @@ export default function Home() {
   const categories = [
     {
       id: 1,
-      title: "Festas Noturnas",
-      icon: PartyPopper,
-      description: "Diversão noturna e música",
+      title: "Conferências de Tecnologia",
+      icon: Presentation,
+      description: "Tendências e inovações tech",
     },
     {
       id: 2,
-      title: "Palestras & Workshops",
-      icon: Presentation,
-      description: "Aprendizado e networking",
+      title: "Workshops de Negócios",
+      icon: Briefcase,
+      description: "Estratégias e empreendedorismo",
     },
     {
       id: 3,
-      title: "Aniversários & Celebrações",
-      icon: Cake,
-      description: "Momentos especiais e alegria",
+      title: "Eventos de Startups",
+      icon: PartyPopper,
+      description: "Pitchs e networking para startups",
     },
     {
       id: 4,
-      title: "Shows & Concertos",
+      title: "Summits de Inovação",
       icon: Mic,
-      description: "Música ao vivo e entretenimento",
+      description: "Ideias disruptivas e futuro",
     },
     {
       id: 5,
-      title: "Eventos Corporativos",
+      title: "Networking Empresarial",
       icon: Briefcase,
-      description: "Reuniões e negócios",
+      description: "Conexões e oportunidades de negócio",
     },
   ];
 
@@ -62,6 +82,17 @@ export default function Home() {
     };
     fetchTickets();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowText(false);
+      setTimeout(() => {
+        setCurrentTextIndex((prev) => (prev + 1) % texts.length);
+        setShowText(true);
+      }, 500);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [texts.length]);
 
   if (loading) {
     return (
@@ -124,12 +155,41 @@ export default function Home() {
     <section className="m-32">
       <div>
         <h1 className="text-2xl font-semibold">
-          Encontre o sue próximo <span>Evento</span>
+          Encontre o seu próximo <span>Evento</span>
         </h1>
         <p className="text-md opacity-90 text-zinc-500">
-          Descubra os melhores eventos, festas e experiências em Angola
+          Descubra os melhores eventos de tecnologia e negócio em Angola
         </p>
-        <SearchBar />
+        <div className="relative mt-12 h-64 rounded-lg overflow-hidden shadow-lg">
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-600 to-zinc-900">
+            <img
+              src="https://evessio.s3.amazonaws.com/customer/b4289942-d924-4d3d-9044-2b4131d4ae91/event/c80bc84d-48e8-4e21-ad98-e1f07cd04705/media/eb29de31-node_24174241-node_emap_Techfest_Day_Conference_Nov_23-187_Large_Large.jpeg"
+              alt=""
+              className="w-full h-full object-cover"
+            />
+            {/* camada para escurecer só a imagem */}
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-800/75 to-zinc-900/75"></div>
+          </div>
+
+          <div className="relative z-10 flex items-center justify-center h-full">
+            <div className="text-center p-6 rounded-lg">
+              <h1
+                className={`text-3xl font-bold mb-2 text-white transition-opacity duration-500 ${
+                  showText ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {texts[currentTextIndex].title}
+              </h1>
+              <p
+                className={`text-md text-white transition-opacity duration-500 ${
+                  showText ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {texts[currentTextIndex].subtitle}
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div>
           <h2 className="text-xl font-normal mt-20 mb-6">Categorias</h2>
@@ -164,7 +224,7 @@ export default function Home() {
               <div>
                 <h1 className="text-xl font-semibold">Eventos - Proximos</h1>
                 <span className="text-sm text-zinc-200">
-                  Sente a vibe dos próximos eventos
+                  Chegou a hora de fazer networking
                 </span>
               </div>
             </div>
@@ -195,7 +255,7 @@ export default function Home() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.slice(0, 3).map((event) => (
+            {events.slice(0, 10).map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>

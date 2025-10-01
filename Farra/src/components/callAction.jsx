@@ -1,7 +1,9 @@
 export default function CallAction() {
   return (
     <div className="bg-gray-100 py-6 px-6  rounded-lg   mt-24 ">
-      <h2 className="text-lg font-bold mb-2">Pronto para começar a festa?</h2>
+      <h2 className="text-lg font-bold mb-2">
+        Pronto para viver momentos inesqueciveis?
+      </h2>
       <p className="text-gray-700 mb-4">
         Crie sua conta hoje e descubra eventos incríveis perto de você!
       </p>

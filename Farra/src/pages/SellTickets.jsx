@@ -137,21 +137,21 @@ export default function SellTickets() {
     try {
       const eventDate = new Date(`${eventData.date}T${eventData.time}`);
 
-      for (const ticket of eventData.tickets) {
-        await sellTicket({
-          eventTitle: eventData.title,
-          eventDate,
-          eventTime: eventData.time,
-          eventLocation: eventData.location,
-          eventAddress: eventData.location, // Usando location como address por enquanto
-          eventDescription: eventData.description,
-          eventImage: eventData.image || "",
-          eventCategory: eventData.category,
-          ticketType: ticket.type,
+      await sellTicket({
+        eventTitle: eventData.title,
+        eventDate,
+        eventTime: eventData.time,
+        eventLocation: eventData.location,
+        eventAddress: eventData.location, // Usando location como address por enquanto
+        eventDescription: eventData.description,
+        eventImage: eventData.image || "",
+        eventCategory: eventData.category,
+        tickets: eventData.tickets.map((ticket) => ({
+          type: ticket.type,
           price: parseFloat(ticket.price),
-          quantityAvailable: parseInt(ticket.quantity),
-        });
-      }
+          quantity: parseInt(ticket.quantity),
+        })),
+      });
 
       alert("Ingressos criados com sucesso!");
       navigate("/"); // ou outra página
@@ -164,14 +164,11 @@ export default function SellTickets() {
   };
 
   const categories = [
-    "Festas Noturnas",
-    "Palestras & Workshops",
-    "Aniversários & Celebrações",
-    "Shows & Concertos",
-    "Eventos Corporativos",
-    "Esportivos",
-    "Culturais",
-    "Gastronômicos",
+    "Conferências de Tecnologia",
+    "Workshops de Negócios",
+    "Eventos de Startups",
+    "Summits de Inovação",
+    "Networking Empresarial",
   ];
 
   return (
